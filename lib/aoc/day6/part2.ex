@@ -6,7 +6,7 @@ defmodule Aoc.Day6.Part2 do
   end
   def steps_until_repeat(banks), do: steps_until_repeat(banks, 0, %{banks => 0})
   def steps_until_repeat(banks, steps_so_far, old_configs) do
-    new_config = banks |> Part1.step(Enum.count(banks))
+    new_config = banks |> Part1.step()
 
     if Map.has_key?(old_configs, new_config) do
       (steps_so_far + 1) - Map.get(old_configs, new_config)

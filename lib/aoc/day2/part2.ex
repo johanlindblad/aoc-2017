@@ -1,4 +1,7 @@
 defmodule Aoc.Day2.Part2 do
+  alias Aoc.Day2.Part1
+  defdelegate line_to_numbers(line), to: Part1
+
   def checksum(spreadsheet) do
     String.split(spreadsheet, "\n")
     |> Enum.map(&line_to_numbers/1)
@@ -6,29 +9,12 @@ defmodule Aoc.Day2.Part2 do
     |> Enum.sum
   end
 
-  defp line_to_numbers(line) do
-    String.split(line, "\s")
-    |> Enum.map(&String.to_integer/1)
-  end
-
-  defp even_division([head | tail]) do
-    check = fn(number) -> result(head, number) != nil end
-    div = Enum.find(tail, check)
-
-    if div do
-      result(div, head)
-    else
-      even_division(tail)
-    end
-  end
-
-  defp result(numerator, denominator) when numerator < denominator do
-    result(denominator, numerator)
-  end
-
-  defp result(numerator, denominator) do
-    if rem(numerator, denominator) == 0 do
-      div(numerator, denominator)
+  defp even_division([_first]), do: false
+  defp even_division([first | [second | tail] ]) do
+    cond do
+      rem(first, second) == 0 -> div(first, second)
+      rem(second, first) == 0 -> div(second, first)
+      true -> even_division([first | tail]) || even_division([second | tail])
     end
   end
 end

@@ -6,12 +6,12 @@ defmodule Aoc.Day2.Part1 do
     |> Enum.sum
   end
 
-  defp line_to_numbers(line) do
+  def line_to_numbers(line) do
     String.split(line, "\s")
     |> Enum.map(&String.to_integer/1)
   end
 
-  defp delta(numbers) do
+  def delta(numbers) do
     Enum.max(numbers) - Enum.min(numbers)
   end
 end

@@ -45,16 +45,18 @@ defmodule Aoc.Day7.Part2 do
 
   iex> Aoc.Day7.Part2.unique_element([2,1,1])
   {2,0}
+  iex> Aoc.Day7.Part2.unique_element([1,2,1])
+  {2,1}
   iex> Aoc.Day7.Part2.unique_element([1,1,2])
   {2,2}
 
   """
   def unique_element([head | tail]), do: unique_element(tail, {head, 0}, 0)
-  def unique_element([head | tail], {candidate, index}, at) when head == candidate, do: unique_element(tail, {candidate, index}, at + 1)
+  def unique_element([candidate | tail], {candidate, index}, at), do: unique_element(tail, {candidate, index}, at + 1)
   def unique_element([head], _candidate, at), do: {head, at + 1}
-  def unique_element([head | tail], {candidate, index}, at), do: unique_element(tail, {candidate, index}, {head, at}, at + 1)
-  def unique_element([head | _tail], {candidate, _}, {other, index}, _at) when head == candidate, do: {other, index}
-  def unique_element([head | _tail], {candidate, index}, {other, _}, _at) when head == other, do: {candidate, index}
+  def unique_element([head | tail], {candidate, index}, at), do: unique_element(tail, {candidate, index}, {head, at + 1}, at + 1)
+  def unique_element([candidate | _tail], {candidate, _}, {other, index}, _at), do: {other, index}
+  def unique_element([other | _tail], {candidate, index}, {other, _}, _at), do: {candidate, index}
 
   @doc """
   Calculates the weight of the tree

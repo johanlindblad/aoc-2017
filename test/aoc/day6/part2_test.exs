@@ -3,8 +3,8 @@ defmodule Aoc.Day6.Part2Test do
   alias Aoc.Day6.Part2
   doctest Aoc.Day6.Part2
 
-  test "[2 4 1 2] gives 4 steps until repeat" do
-    assert Part2.steps_until_repeat([2, 4, 1, 2]) == 4
+  test "[2 4 1 2] gives a cycle length of 4" do
+    assert Part2.cycle_length([2, 4, 1, 2]) == 4
   end
 end
 

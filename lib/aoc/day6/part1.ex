@@ -2,14 +2,14 @@ defmodule Aoc.Day6.Part1 do
   def steps_until_repeat(banks_string) when is_binary(banks_string) do
     banks_string |> String.split(" ") |> Enum.map(&String.to_integer/1) |> steps_until_repeat
   end
-  def steps_until_repeat(banks), do: steps_until_repeat(banks, 0, MapSet.new |> MapSet.put(banks))
-  def steps_until_repeat(banks, steps_so_far, old_configs) do
+  def steps_until_repeat(banks), do: steps_until_repeat(banks, 1, MapSet.new |> MapSet.put(banks))
+  def steps_until_repeat(banks, step, old_configs) do
     new_config = banks |> step()
 
     if MapSet.member?(old_configs, new_config) do
-      steps_so_far + 1
+      step
     else
-      steps_until_repeat(new_config, steps_so_far + 1, MapSet.put(old_configs, new_config))
+      steps_until_repeat(new_config, step + 1, MapSet.put(old_configs, new_config))
     end
   end
 

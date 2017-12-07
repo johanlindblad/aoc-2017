@@ -1,17 +1,17 @@
 defmodule Aoc.Day6.Part2 do
   alias Aoc.Day6.Part1
 
-  def steps_until_repeat(banks) when is_binary(banks) do
-    banks |> String.split(" ") |> Enum.map(&String.to_integer/1) |> steps_until_repeat
+  def cycle_length(banks_string) when is_binary(banks_string) do
+    banks_string |> String.split(" ") |> Enum.map(&String.to_integer/1) |> cycle_length
   end
-  def steps_until_repeat(banks), do: steps_until_repeat(banks, 0, %{banks => 0})
-  def steps_until_repeat(banks, steps_so_far, old_configs) do
+  def cycle_length(banks), do: cycle_length(banks, 1, %{banks => 0})
+  def cycle_length(banks, step, old_configs) do
     new_config = banks |> Part1.step()
 
     if Map.has_key?(old_configs, new_config) do
-      (steps_so_far + 1) - Map.get(old_configs, new_config)
+      step - Map.get(old_configs, new_config)
     else
-      steps_until_repeat(new_config, steps_so_far + 1, Map.put(old_configs, new_config, steps_so_far + 1))
+      cycle_length(new_config, step + 1, Map.put(old_configs, new_config, step))
     end
   end
 end

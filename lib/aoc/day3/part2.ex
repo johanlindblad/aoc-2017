@@ -49,24 +49,28 @@ defmodule Aoc.Day3.Part2 do
     indices = [inner_index(square), square - 1]
 
     if is_corner(square) do
-      if to_next_layer == 1 do
-        indices = [inner_index(square) + 1 | indices] 
+      case to_next_layer do
+        1 -> [inner_index(square) + 1 | indices]
+        _ -> indices
       end
     else
-      if first_in_layer == false && (to_next_corner  != 1 || to_next_layer <= 2) do
-        indices = [inner_index(square) + 1 | indices] 
+      indices = case first_in_layer == false && (to_next_corner  != 1 || to_next_layer <= 2) do
+        true -> [inner_index(square) + 1 | indices] 
+        false -> indices
       end
 
-      if from_last_corner != 1 && distance_from_start > 1 do
-        indices = [inner_index(square) - 1 | indices] 
+      indices = case from_last_corner != 1 && distance_from_start > 1 do
+        true -> [inner_index(square) - 1 | indices] 
+        false -> indices
       end
 
-      if distance_from_start == 1 || (from_last_corner == 1 && distance_from_start > 1) do
-        indices = [square - 2 | indices] 
+      indices = case distance_from_start == 1 || (from_last_corner == 1 && distance_from_start > 1) do
+        true -> [square - 2 | indices] 
+        false -> indices
       end
+
+      indices
     end
-
-    indices
   end
 
   def inner_index(square) when square > 1 do

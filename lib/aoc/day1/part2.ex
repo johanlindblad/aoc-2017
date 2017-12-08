@@ -9,5 +9,5 @@ defmodule Aoc.Day1.Part2 do
   def inner_captcha([first | rest], [other_first | other_rest]) when first == other_first do
     first + inner_captcha(rest, other_rest ++ [first])
   end
-  def inner_captcha([first | rest], [other_first | other_rest]), do: inner_captcha(rest, other_rest ++ [first])
+  def inner_captcha([first | rest], [_other_first | other_rest]), do: inner_captcha(rest, other_rest ++ [first])
 end

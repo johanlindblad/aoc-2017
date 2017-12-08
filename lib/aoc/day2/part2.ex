@@ -10,7 +10,7 @@ defmodule Aoc.Day2.Part2 do
   end
 
   defp even_division([_first]), do: false
-  defp even_division([first | [second | tail] ]) do
+  defp even_division([first, second | tail]) do
     cond do
       rem(first, second) == 0 -> div(first, second)
       rem(second, first) == 0 -> div(second, first)

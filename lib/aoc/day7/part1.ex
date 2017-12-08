@@ -43,15 +43,8 @@ defmodule Aoc.Day7.Part1 do
   {:fwft, [:ktlj, :cntj, :xhth]}
 
   """
-  def parse_line(line) do
-    [name | rest] = line |> String.replace("->", "") |> String.split()
-    [_weight | children] = rest
-    {String.to_atom(name), parse_children(children)}
-  end
-
-  defp parse_children(child_string) do
-    child_string
-    |> Enum.map(&(String.trim_trailing(&1, ",")))
-    |> Enum.map(&String.to_atom/1)
-  end
+  def parse_line([name, _weight]), do: {String.to_atom(name), []}
+  def parse_line([name, _weight, "->" | children]), do: {String.to_atom(name), Enum.map(children, &clean/1)}
+  def parse_line(line), do: parse_line(String.split(line, " "))
+  defp clean(child_string), do: child_string |> String.trim_trailing(",") |> String.to_atom
 end

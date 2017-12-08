@@ -101,26 +101,25 @@ defmodule Aoc.Day7.Part2 do
     {structure_map, tree}
   end
 
+
   @doc """
   Builds a map of node weights from the description
 
   ## Examples
 
   iex> Aoc.Day7.Part2.parse_weights("pbga (66)
-  iex> xhth (57)")
+  iex>xhth (57)")
   %{pbga: 66, xhth: 57}
 
   """
   def parse_weights(lines) do
     lines
+    |> String.replace(~r/\(|\)|->/, "")
     |> String.split("\n")
     |> Enum.map(&(parse_line(&1)))
     |> Enum.into(%{})
   end
 
-  defp parse_line(line) do
-    [name | rest] = line |> String.replace(~r/\(|\)|->/, "") |> String.split()
-    [weight | _children] = rest
-    {String.to_atom(name), String.to_integer(weight)}
-  end
+  defp parse_line([name, weight | _]), do: {String.to_atom(name), String.to_integer(weight)}
+  defp parse_line(line), do: parse_line(String.split(line, " "))
 end

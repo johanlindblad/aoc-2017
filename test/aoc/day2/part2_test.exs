@@ -9,4 +9,8 @@ defmodule Aoc.Day2.Part2Test do
   test "example gives 9" do
     assert Part2.checksum(@example) == 9
   end
+
+  test "puzzle input produces 303" do
+    assert Part2.checksum(Aoc.puzzle_input(2)) == 303
+  end
 end

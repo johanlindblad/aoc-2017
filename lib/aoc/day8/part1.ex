@@ -1,8 +1,9 @@
 defmodule Aoc.Day8.Part1 do
   def parse(input) do
-    (for line <- String.split(input, "\n"), do: String.split(line, " "))
-    |> Enum.map(&clean/1)
+    String.trim(input) |> String.split("\n") |> Enum.map(&parse_row/1)
   end
+
+  def parse_row(row), do: String.split(row) |> clean
 
   def simulate(instructions), do: simulate(instructions, %{})
   def simulate([], registers), do: Map.values(registers) |> Enum.max
@@ -18,7 +19,7 @@ defmodule Aoc.Day8.Part1 do
   end
 
   def registers_after(registers, reg, op, opa) do
-    current = Map.get(registers, reg, 0)
+    current = registers[reg] || 0
     Map.put(registers, reg, operation(current, op, opa))
   end
 

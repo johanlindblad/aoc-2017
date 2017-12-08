@@ -20,5 +20,9 @@ defmodule Aoc.Day6.Part1Test do
     result = [11, 4, 0, 11, 6, 16, 6, 16, 10, 3, 6, 9, 6, 3, 4, 7]
     assert Part1.step(before) == result
   end
+
+  test "puzzle input gives 14029" do
+    assert Part1.steps_until_repeat(Aoc.puzzle_input(6)) == 14029
+  end
 end
 

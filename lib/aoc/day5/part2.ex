@@ -3,6 +3,7 @@ defmodule Aoc.Day5.Part2 do
 
   def steps_to_exit(input_string) do
     input_string
+    |> String.trim
     |> String.split("\n")
     |> Enum.map(&String.to_integer/1)
     |> simulate()

@@ -11,5 +11,10 @@ c inc -20 if c == 10"
     val = Part1.parse(@example) |> Part1.simulate
     assert val == 1
   end
+
+  test "simulation gives 4647 for puzzle input" do
+    val = Part1.parse(Aoc.puzzle_input(8)) |> Part1.simulate
+    assert val == 4647
+  end
 end
 

@@ -29,5 +29,9 @@ cntj (57)"
   test "mismatch for example input gives 60" do
     assert Part2.parse_and_find(@example) == 60
   end
+
+  test "mismatch for puzzle input gives 749" do
+    assert Part2.parse_and_find(Aoc.puzzle_input(7)) == 749
+  end
 end
 

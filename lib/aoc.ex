@@ -3,16 +3,10 @@ defmodule Aoc do
   Documentation for Aoc.
   """
 
-  @doc """
-  Hello world.
+  def puzzle_input(day) do
+    {:ok, contents} = Path.join(:code.priv_dir(:aoc), "day#{day}.txt")
+                      |> File.read
 
-  ## Examples
-
-      iex> Aoc.hello
-      :world
-
-  """
-  def hello do
-    :world
+    contents
   end
 end

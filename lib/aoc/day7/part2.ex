@@ -114,6 +114,7 @@ defmodule Aoc.Day7.Part2 do
   """
   def parse_weights(lines) do
     lines
+    |> String.trim
     |> String.replace(~r/\(|\)|->/, "")
     |> String.split("\n")
     |> Enum.map(&(parse_line(&1)))

@@ -3,7 +3,8 @@ defmodule Aoc.Day2.Part2 do
   defdelegate line_to_numbers(line), to: Part1
 
   def checksum(spreadsheet) do
-    String.split(spreadsheet, "\n")
+    String.trim(spreadsheet)
+    |> String.split("\n")
     |> Enum.map(&line_to_numbers/1)
     |> Enum.map(&even_division/1)
     |> Enum.sum

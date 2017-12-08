@@ -1,6 +1,6 @@
 defmodule Aoc.Day1.Part1 do
   def captcha(digit_string) do
-    digits = String.graphemes(digit_string) |> Enum.map(&String.to_integer/1)
+    digits = String.trim(digit_string) |> String.graphemes |> Enum.map(&String.to_integer/1)
     inner_captcha(digits)
   end
 

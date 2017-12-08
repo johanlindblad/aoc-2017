@@ -17,4 +17,8 @@ defmodule Aoc.Day1.Part1Test do
   test "91212129" do
     assert Part1.captcha("91212129") == 9
   end
+
+  test "puzzle input produces 1097" do
+    assert Part1.captcha(Aoc.puzzle_input(1)) == 1097
+  end
 end

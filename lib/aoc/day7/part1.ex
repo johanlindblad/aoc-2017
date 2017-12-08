@@ -28,6 +28,7 @@ defmodule Aoc.Day7.Part1 do
 
   def parse_structure(lines) do
     lines
+    |> String.trim
     |> String.split("\n")
     |> Enum.map(&(parse_line(&1)))
   end

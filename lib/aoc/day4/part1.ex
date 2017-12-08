@@ -1,6 +1,7 @@
 defmodule Aoc.Day4.Part1 do
   def num_valid(passwords_string) do
     passwords_string
+    |> String.trim
     |> String.split("\n")
     |> Enum.count(&valid?/1)
   end

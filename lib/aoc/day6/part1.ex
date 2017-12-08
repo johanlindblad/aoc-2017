@@ -1,6 +1,6 @@
 defmodule Aoc.Day6.Part1 do
   def steps_until_repeat(banks_string) when is_binary(banks_string) do
-    banks_string |> String.split(" ") |> Enum.map(&String.to_integer/1) |> steps_until_repeat
+    banks_string |> String.trim |> String.split |> Enum.map(&String.to_integer/1) |> steps_until_repeat
   end
   def steps_until_repeat(banks), do: steps_until_repeat(banks, 1, MapSet.new |> MapSet.put(banks))
   def steps_until_repeat(banks, step, old_configs) do

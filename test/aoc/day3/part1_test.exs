@@ -18,4 +18,8 @@ defmodule Aoc.Day3.Part1Test do
   test "1024 gives 31 steps" do
     assert Part1.steps(1024) == 31
   end
+
+  test "puzzle input gives 475" do
+    assert Part1.steps(Aoc.puzzle_input(3) |> String.trim |> String.to_integer) == 475
+  end
 end

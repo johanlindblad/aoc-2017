@@ -19,5 +19,9 @@ cntj (57)"
   test "finds tknk as root with example case" do
     assert Part1.parse_and_find(@example) == :tknk
   end
+
+  test "puzzle input gives veboyvy" do
+    assert Part1.parse_and_find(Aoc.puzzle_input(7)) == :veboyvy
+  end
 end
 

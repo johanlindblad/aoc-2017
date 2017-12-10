@@ -1,117 +1,84 @@
 defmodule Aoc.Day3.Part2 do
   alias Aoc.Day3.Part1
+  require Aoc.Day3.Part1
   use Bitwise
 
+  defmacro is_last_in_layer(s) do
+    quote do
+      elem(unquote(s), Part1.square(:address)) == elem(unquote(s), Part1.square(:next_layer_after))
+      #Part1.square(unquote(s), :address) == Part1.square(unquote(s), :next_layer_after)
+    end
+  end
+  defmacro is_next_to_last(s) do
+    quote do
+      Part1.square(unquote(s), :address) + 1 == Part1.square(unquote(s), :next_layer_after)
+    end
+  end
+  defmacro is_first_in_layer(square), do: quote do: Part1.square(unquote(square), :index_in_layer) == 0
+  defmacro is_second_in_layer(square), do: quote do: Part1.square(unquote(square), :index_in_layer) == 1
+  defmacro is_corner(square), do: quote do: Part1.square(unquote(square), :from_last_corner) == 0
+  defmacro is_first_after_corner(square), do: quote do: Part1.square(unquote(square), :from_last_corner) == 1
+  defmacro is_first_before_corner(square), do: quote do: Part1.square(unquote(square), :to_next_corner) == 1
+
   def first_greater_than(n) do
-    natural_numbers()
-    |> Stream.map(&value/1)
-    |> Stream.drop_while(fn(val) -> val <= n end)
-    |> Enum.take(1)
-    |> List.first
+    Part1.squares
+    |> Stream.drop(1)
+    |> Stream.map(&relative_indices/1)
+    |> Enum.reduce_while([1], fn (offsets, acc) ->
+        case (Enum.map(offsets, &Enum.at(acc, -&1 - 1)) |> Enum.sum) do
+          val when val > n -> {:halt, val}
+          val -> {:cont, [val | acc]}
+        end
+    end)
   end
 
-  def value(1), do: 1
-  def value(square) do
-    indices_for(square)
-    |> Enum.map(&value/1)
-    |> Enum.sum
+  def values(n) do
+    Part1.squares
+    |> Stream.map(&relative_indices/1)
+    |> Enum.take(n)
+    |> Enum.drop(1)
+    |> Enum.reduce([1], fn (offsets, acc) ->
+        acc ++ [(Enum.map(offsets, &Enum.at(acc, &1)) |> Enum.sum)]
+    end)
   end
 
-  @doc """
-  Returns the indices from which the given square is built
-
-  ## Examples
-
-  iex> Part2.indices_for(10) |> Enum.sort
-  [2, 9]
-  iex> Part2.indices_for(11) |> Enum.sort
-  [2, 3, 9, 10]
-  iex> Part2.indices_for(17) |> Enum.sort
-  [5, 16]
-  iex> Part2.indices_for(18) |> Enum.sort
-  [5, 6, 16, 17]
-  iex> Part2.indices_for(24) |> Enum.sort
-  [8, 9, 10, 23]
-  """
-  def indices_for(2), do: [1]
-  def indices_for(square) do
-    # TODO: this is repeated everywhere
-    layer_number = Part1.layer_number(square)
-    # widest point
-    layer_width = (2 * layer_number) + 1
-
-    distance_from_start = square - Part1.first_in_layer(layer_number)
-    first_in_layer = 0 == distance_from_start
-    from_last_corner = 1 + rem(distance_from_start, layer_width - 1)
-    to_next_corner = (layer_width - 1) - from_last_corner
-    to_next_layer = Part1.first_in_layer(layer_number + 1) - square
-
-    indices = [inner_index(square), square - 1]
-
-    if is_corner(square) do
-      case to_next_layer do
-        1 -> [inner_index(square) + 1 | indices]
-        _ -> indices
-      end
-    else
-      indices = case first_in_layer == false && (to_next_corner  != 1 || to_next_layer <= 2) do
-        true -> [inner_index(square) + 1 | indices] 
-        false -> indices
-      end
-
-      indices = case from_last_corner != 1 && distance_from_start > 1 do
-        true -> [inner_index(square) - 1 | indices] 
-        false -> indices
-      end
-
-      indices = case distance_from_start == 1 || (from_last_corner == 1 && distance_from_start > 1) do
-        true -> [square - 2 | indices] 
-        false -> indices
-      end
-
-      indices
-    end
+  def relative_indices(Part1.square(address: 1)), do: []
+  def relative_indices(Part1.square(address: 2)), do: [-1]
+  def relative_indices(sq = Part1.square()) do
+    adjacent_offsets(sq) ++ inner_offsets(sq) ++ start_of_layer_offset(sq)
+    |> Enum.uniq
   end
 
-  def inner_index(square) when square > 1 do
-    layer_number = Part1.layer_number(square)
-    # widest point
-    layer_width = (2 * layer_number) + 1
+  def adjacent_offsets(Part1.square(index_in_layer: index)) when index == 0, do: [-1]
+  def adjacent_offsets(Part1.square(from_last_corner: from_corner)) when from_corner == 1, do: [-1, -2]
+  def adjacent_offsets(Part1.square(index_in_layer: index)) when index == 1, do: [-1, -2]
+  def adjacent_offsets(_), do: [-1]
 
-    distance_from_start = square - Part1.first_in_layer(layer_number)
-    first_in_layer = distance_from_start == 0
-    corners_passed = div(distance_from_start, layer_width - 1)
-    previous_layer_length = 2 * ((layer_width - 2) + (layer_width - 4))
+  def inner_offsets(sq) when is_corner(sq), do: [inner_offset(sq)]
+  def inner_offsets(sq = Part1.square(layer: 2)), do: [inner_offset(sq)]
+  def inner_offsets(sq) when is_first_in_layer(sq), do: [inner_offset(sq)]
+  def inner_offsets(sq) when is_first_after_corner(sq), do: [inner_offset(sq), inner_offset(sq) + 1]
+  def inner_offsets(sq) when is_first_before_corner(sq), do: [inner_offset(sq), inner_offset(sq) - 1]
+  def inner_offsets(sq) when is_second_in_layer(sq), do: [inner_offset(sq), inner_offset(sq) + 1]
+  def inner_offsets(sq), do: [inner_offset(sq) + 1, inner_offset(sq), inner_offset(sq) - 1]
 
-    remove = cond do
-      first_in_layer ->
-        0
-      is_corner(square) ->
-        2
-      true ->
-        1
-    end
+  def start_of_layer_offset(sq) when is_last_in_layer(sq), do: [first_in_layer_offset(sq)]
+  def start_of_layer_offset(sq) when is_next_to_last(sq), do: [first_in_layer_offset(sq)]
+  def start_of_layer_offset(_), do: []
 
-    square - (previous_layer_length + (2 * corners_passed)) - remove
+  def start_of_last_layer_offset(sq) when is_first_in_layer(sq), do: [first_in_layer_offset(sq)]
+
+   def inner_offset(s = Part1.square()) when is_corner(s) do
+    -(4 * inner_layer_width(s)) - (2 * corners_passed(s)) - 2
+  end
+  def inner_offset(s = Part1.square()) when is_first_in_layer(s) do
+    -(4 * inner_layer_width(s)) - (2 * corners_passed(s))
+  end
+  def inner_offset(s = Part1.square()) do
+    -(4 * inner_layer_width(s)) - (2 * corners_passed(s)) - 1
   end
 
-  def is_corner(square) when square > 1 do
-    layer_number = Part1.layer_number(square)
-    # widest point
-    layer_width = (2 * layer_number) + 1
-
-    distance_from_start = square - Part1.first_in_layer(layer_number)
-    from_last_corner = 1 + rem(distance_from_start, layer_width - 1)
-    to_next_corner = (layer_width - 1) - from_last_corner
-
-    to_next_corner == 0
-  end
-
-  def layer_size(layer_n) do
-    (8 * layer_n * (layer_n+1)) >>> 1
-  end
-
-  defp natural_numbers do
-    Stream.iterate(1, &(&1 + 1))
-  end
+  def first_in_layer_offset(Part1.square(index_in_layer: index)), do: -index
+  def corners_passed(Part1.square(index_in_layer: index, layer_width: width)), do: div(index, width)
+  def inner_layer_width(Part1.square(layer_width: width)), do: width - 2
 end

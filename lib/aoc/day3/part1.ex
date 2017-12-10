@@ -1,75 +1,36 @@
 defmodule Aoc.Day3.Part1 do
-  use Bitwise
-  # Can be decomposed into one vector inwards and one vector
-  # pointing to the center of the current row
-  def steps(1), do: 0
+  require Record
+  Record.defrecord :square, address: 1, layer: 1, index_in_layer: 0, layer_width: 1, next_layer_after: 1, from_last_corner: 0, to_next_corner: 2
+  
   def steps(square) do
-    # The first vector is simply the layer number
-    inward = layer_number(square)
-
-    layer_number = layer_number(square)
-    # widest point
-    layer_width = (2 * layer_number) + 1
-
-    distance_from_start = square - first_in_layer(layer_number)
-    from_last_corner = 1 + rem(distance_from_start, layer_width - 1)
-    to_next_corner = (layer_width - 1) - from_last_corner
-    distance_to_center = abs(div(from_last_corner - to_next_corner, 2))
-
-    inward + distance_to_center
+    squares()
+    |> Stream.drop(square - 1)
+    |> Enum.at(0)
+    |> distance
   end
 
-  @doc """
-  Returns the layer in which the given square resides
-
-  ## Examples
-
-  iex> Part1.layer_number(25)
-  2
-  iex> Part1.layer_number(26)
-  3
-    
-  """
-  def layer_number(square) do
-    layer_sizes()
-    |> Stream.take_while(fn(n) -> n < (square - 1) end)
-    |> Enum.to_list
-    |> Kernel.length
-    |> Kernel.+(1)
+  def squares do
+    Stream.iterate({:square, 1, 1, 0, 1, 1, 0, 0}, &next_square_after/1)
   end
 
-  @doc """
-  Returns the first number of the given layer
-
-  ## Examples
-
-  iex> Part1.first_in_layer(1)
-  2
-  iex> Part1.first_in_layer(2)
-  10
-  iex> Part1.first_in_layer(3)
-  26
-    
-"""
-  def first_in_layer(1), do: 2
-  def first_in_layer(layer) do
-    layer_sizes()
-    |> Enum.take(layer - 1)
-    |> Enum.at(-1)
-    |> Kernel.+(2)
+  def next_square_after({:square, 1, _, _, _, _, _, _}), do: {:square, 2, 2, 0, 2, 9, 1, 1}
+  def next_square_after(
+    {:square, address, layer, _index_in_layer, layer_width, next_layer_after, _from_last_corner, _to_next_corner,}
+  ) when address == next_layer_after do
+    next_layer_after = next_layer_after + (layer_width * 4) + 8
+    {:square, address + 1, layer + 1, 0, layer_width + 2, next_layer_after, 1, layer_width + 1}
+  end
+  def next_square_after({:square, address, layer, index_in_layer, layer_width, next_layer_after, _, 1}) do
+    {:square, address + 1, layer, index_in_layer + 1, layer_width, next_layer_after, 0, layer_width}
+  end
+  def next_square_after({:square, address, layer, index_in_layer, layer_width, next_layer_after, from_last_corner, to_next_corner}) do
+    {:square, address + 1, layer, index_in_layer + 1, layer_width, next_layer_after, from_last_corner + 1, to_next_corner - 1}
   end
 
-  defp layer_sizes do
-    triangle_numbers()
-    |> Stream.map(fn(t_num) -> 8 * t_num end)
-  end
-
-  defp triangle_numbers do
-    natural_numbers()
-    |> Stream.scan(fn(num, acc) -> acc + num end)
-  end
-
-  defp natural_numbers do
-    Stream.iterate(1, &(&1 + 1))
+  def distance({:square, 1, _, _, _, _, _}), do: 0
+  def distance({:square, _, layer, _, _, _, from_last_corner, to_next_corner}) do
+    abs(from_last_corner - to_next_corner)
+    |> div(2)
+    |> Kernel.+(layer - 1)
   end
 end

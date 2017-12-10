@@ -1,16 +1,17 @@
 defmodule Aoc.Day9.Part1 do
-  def parse(string) when is_binary(string), do: parse(String.trim(string) |> String.graphemes, 1)
-  def parse(["{" | rest], level) do
-    level + parse(rest, level + 1)
-  end
+  def score(string), do: elem(parse(string), 0)
 
-  def parse(["}" | rest], level), do: parse(rest, level - 1)
-  def parse(["," | rest], level), do: parse(rest, level)
-  def parse(["" | rest], level), do: parse(rest, level)
-  def parse(["<" | rest], level), do: garbage(rest, level)
-  def parse([], _level), do: 0
+  def parse(string, level \\ 1, score \\ 0, garbage \\ 0)
+  def parse("{" <> rest, level, score, garbage), do: parse(rest, level + 1, score + level, garbage)
+  def parse("}" <> rest, level, score, garbage), do: parse(rest, level - 1, score, garbage)
+  def parse("," <> rest, level, score, garbage), do: parse(rest, level, score, garbage)
+  def parse("<" <> rest, level, score, garbage), do: garbage(rest, level, score, garbage)
+  def parse("\n" <> rest, level, score, garbage), do: parse(rest, level, score, garbage)
+  def parse("", _, score, garbage), do: {score, garbage}
 
-  def garbage([">" | rest], level), do: parse(rest, level)
-  def garbage(["!", _ | rest], level), do: garbage(rest, level)
-  def garbage([_ | rest], level), do: garbage(rest, level)
+  def garbage(">" <> rest, level, score, garbage), do: parse(rest, level, score, garbage)
+  def garbage("!" <> rest, level, score, garbage), do: escaped(rest, level, score, garbage)
+  def garbage(<<_>> <> rest, level, score, garbage), do: garbage(rest, level, score, garbage + 1)
+
+  def escaped(<<_>> <> rest, level, score, garbage), do: garbage(rest, level, score, garbage)
 end

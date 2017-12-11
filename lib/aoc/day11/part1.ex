@@ -3,22 +3,19 @@ defmodule Aoc.Day11.Part1 do
     input |> preprocess |> walk |> distance
   end
   def preprocess(input) when is_binary(input), do: String.trim(input) |> String.split(",")
+  def walk(steps), do: steps |> Enum.map(&effect/1) |> Enum.reduce(&sum/2)
+ 
+  def effect("n"), do: {0, 2}
+  def effect("s"), do: {0, -2}
+  def effect("ne"), do: {1, 1}
+  def effect("se"), do: {1, -1}
+  def effect("sw"), do: {-1, -1}
+  def effect("nw"), do: {-1, 1}
 
-  def walk(steps, coordinates \\ {0, 0})
-  def walk(["n" | steps], {x, y}), do: walk(steps, {x, y + 2})
-  def walk(["s" | steps], {x, y}), do: walk(steps, {x, y - 2})
-  def walk(["ne" | steps], {x, y}), do: walk(steps, {x + 1, y + 1})
-  def walk(["se" | steps], {x, y}), do: walk(steps, {x + 1, y - 1})
-  def walk(["sw" | steps], {x, y}), do: walk(steps, {x - 1, y - 1})
-  def walk(["nw" | steps], {x, y}), do: walk(steps, {x - 1, y + 1})
-  def walk([], {x, y}), do: {x, y}
+  def distance({x, y}) when x < 0 or y < 0, do: distance({abs(x), abs(y)})
+  def distance({0, y}), do: div(y, 2)
+  def distance({x, 0}), do: x
+  def distance({x, y}), do: min(x, y) + distance({x - min(x,y), y - min(x,y)})
 
-  def distance({0, 0}), do: 0
-  def distance({0, y}), do: div(y, 2) |> abs
-  def distance({x, y}) do
-    1 + distance({x - sgn(x), y - sgn(y)})
-  end
-
-  defp sgn(n) when n < 0, do: -1
-  defp sgn(_), do: 1
+  def sum({a, b}, {c, d}), do: {a + c, b + d}
 end

@@ -14,8 +14,8 @@ defmodule Aoc.Day11.Part1 do
 
   def distance({x, y}) when x < 0 or y < 0, do: distance({abs(x), abs(y)})
   def distance({0, y}), do: div(y, 2)
-  def distance({x, 0}), do: x
-  def distance({x, y}), do: min(x, y) + distance({x - min(x,y), y - min(x,y)})
+  def distance({x, y}) when y <= x, do: x
+  def distance({x, y}), do: div(x+y, 2)
 
   def sum({a, b}, {c, d}), do: {a + c, b + d}
 end

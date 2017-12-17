@@ -7,10 +7,11 @@ defmodule Aoc.Day17.Part1 do
     Enum.at(list, index + 1)
   end
 
+  def step(list, current_index, steps)
   def step([], _, _), do: {1, [0]}
   def step(list, current_index, steps) do
     value = length(list)
-    index = (1 + current_index + steps) |> rem(length(list))
+    index = (current_index + steps) |> rem(length(list)) |> Kernel.+(1)
     {index, List.insert_at(list, index, value)}
   end
 end

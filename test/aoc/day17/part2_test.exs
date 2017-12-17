@@ -1,4 +1,4 @@
-defmodule Aoc.Day17.Part1Test do
+defmodule Aoc.Day17.Part2Test do
   use ExUnit.Case
   alias Aoc.Day17.Part2
   doctest Aoc.Day17.Part2

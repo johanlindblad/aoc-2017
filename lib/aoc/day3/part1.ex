@@ -9,7 +9,7 @@ defmodule Aoc.Day3.Part1 do
   def next_square_after(sq = square(to_next_layer: 1, layer: layer, layer_width: layer_width)) do
     increment(sq) |> square(
       layer: layer + 1, layer_width: layer_width + 2,
-      from_start: 0, to_next_layer: (layer_width * 4) + 8,
+      from_start: 0, to_next_layer: (layer_width + 2) * 4,
       from_corner: 1, to_corner: layer_width + 1
     )
   end

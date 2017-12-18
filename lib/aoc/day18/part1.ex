@@ -4,9 +4,7 @@ defmodule Aoc.Day18.Part1 do
   def preprocess(input), do: input |> String.trim |> String.split("\n") |> Enum.map(&preprocess_row/1)
   def preprocess_row(row), do: row |> String.trim |> String.split(" ")
 
-  @a_ord 97
-  @z_ord 122
-  @initial_registers Enum.map(@a_ord..@z_ord, fn(_) -> 0 end)
+  @initial_registers Enum.map(?a..?z, fn(_) -> 0 end)
   Record.defrecord :machine, state: :running, registers: @initial_registers, send_queue: [], receive_queue: [], first_received: nil, program: [], program_past: []
 
   def first_received(instructions) do
@@ -36,45 +34,43 @@ defmodule Aoc.Day18.Part1 do
   def simulate(machine = machine(state: :halted), _), do: machine
 
   def step(machine = machine(registers: registers), ["set", a, b]) do
-    registers = List.replace_at(registers, register_index(a), value(registers, b))
+    registers = List.replace_at(registers, register_index(a), value(machine, b))
     machine(machine, registers: registers)
   end
 
   def step(machine = machine(registers: registers), ["add", a, b]) do
-    registers = List.update_at(registers, register_index(a), &(&1 + value(registers, b)))
+    registers = List.update_at(registers, register_index(a), &(&1 + value(machine, b)))
     machine(machine, registers: registers)
   end
 
   def step(machine = machine(registers: registers), ["mul", a, b]) do
-    registers = List.update_at(registers, register_index(a), &(&1 * value(registers, b)))
+    registers = List.update_at(registers, register_index(a), &(&1 * value(machine, b)))
     machine(machine, registers: registers)
   end
 
   def step(machine = machine(registers: registers), ["mod", a, b]) do
-    registers = List.update_at(registers, register_index(a), &(rem(&1, value(registers, b))))
+    registers = List.update_at(registers, register_index(a), &(rem(&1, value(machine, b))))
     machine(machine, registers: registers)
   end
 
-  def step(machine = machine(registers: registers, program: program, program_past: past), ["jgz", a, b]) do
-    case {value(registers, a), value(registers, b)} do
+  def step(machine = machine(program: program, program_past: past), ["jgz", a, b]) do
+    case {value(machine, a), value(machine, b)} do
       {iff, _} when iff <= 0 -> machine
       {_, jump} when jump < 0 ->
-        steps = 1 - value(registers, b)
-        {moved, rest} = Enum.split(past, steps)
+        {moved, rest} = Enum.split(past, 1 - jump)
         machine(machine, program: Enum.reverse(moved) ++ program, program_past: rest)
       {_, jump} when jump > 0 ->
-        steps = value(registers, b) - 1
-        {moved, rest} = Enum.split(program, steps)
+        {moved, rest} = Enum.split(program, jump - 1)
         machine(machine, program: rest, program_past: Enum.reverse(moved) ++ past)
     end
   end
 
-  def step(machine = machine(send_queue: queue, registers: registers), ["snd", a]) do
-    machine(machine, send_queue: [value(registers, a) | queue])
+  def step(machine = machine(send_queue: queue), ["snd", a]) do
+    machine(machine, send_queue: [value(machine, a) | queue])
   end
 
   def step(machine = machine(first_received: first, registers: registers, receive_queue: queue), ["rcv", a]) do
-    case value(registers, a) do
+    case value(machine, a) do
       0 -> machine
       _ -> 
         [rcv | rest] = queue
@@ -83,8 +79,8 @@ defmodule Aoc.Day18.Part1 do
     end
   end
 
-  def value(registers, spec = <<char>>) when char >= @a_ord, do: Enum.at(registers, register_index(spec))
-  def value(_registers, spec), do: spec |> String.to_integer
+  def value(machine(registers: registers), spec = <<char>>) when char in ?a..?z, do: Enum.at(registers, register_index(spec))
+  def value(_machine, spec), do: spec |> String.to_integer
 
-  def register_index(<<register_name>>) when register_name >= @a_ord, do: register_name - @a_ord
+  def register_index(<<register_name>>) when register_name in ?a..?z, do: register_name - ?a
 end

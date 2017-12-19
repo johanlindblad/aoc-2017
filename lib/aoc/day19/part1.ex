@@ -9,7 +9,20 @@ defmodule Aoc.Day19.Part1 do
   end
 
   def collected(table) do
-    table |> walk_stream |> Enum.at(-1) |> elem(2) |> Enum.reverse |> Enum.join("")
+    table
+    |> coordinate_stream
+    |> Stream.map(fn({x, y}) -> table[{x,y}] end)
+    |> Stream.filter(fn(<<char>>) -> char in ?A..?Z end)
+    |> Enum.join("")
+  end
+
+  def coordinate_stream(table), do: Stream.map(walk_stream(table), fn({coord, _}) -> coord end)
+
+  def walk_stream(table) do
+    Stream.iterate({start_index(table), {0, 1}}, fn({coords, direction}) ->
+      walk(table, coords, direction)
+    end)
+    |> Stream.take_while(fn({_, direction}) -> direction != {0, 0} end)
   end
 
   def start_index(table = %{}, _candidate = {x,0} \\ {0, 0}) do
@@ -19,47 +32,27 @@ defmodule Aoc.Day19.Part1 do
     end
   end
 
-  def walk_stream(table) do
-    Stream.iterate({start_index(table), {0, 1}, []}, fn({coords, direction, collected}) ->
-      walk(table, coords, direction, collected)
-    end)
-    |> Stream.take_while(fn({_, direction, _}) -> direction != {0, 0} end)
-  end
-
-  def walk(table, coordinate, direction \\ {0, 1}, collected \\ [])
-  def walk(table = %{}, {x, y}, {xd, yd}, collected) when x >= 0 and y >= 0 do
+  def walk(table, coordinate, direction \\ {0, 1})
+  def walk(table = %{}, {x, y}, {xd, yd}) when x >= 0 and y >= 0 do
     {xd, yd} = cond do
-      can_walk?(table, {x,y}, {xd, yd}) -> {xd, yd}
-      can_walk?(table, {x, y}, {yd, xd}) -> {yd, xd}
-      can_walk?(table, {x, y}, {-yd, -xd}) -> {-yd, -xd}
+      can_walk?(table[{x+xd,y+yd}]) -> {xd, yd}
+      can_walk?(table[{x+yd,y+xd}]) -> {yd, xd}
+      can_walk?(table[{x-yd,y-xd}]) -> {-yd, -xd}
       true -> {0, 0}
     end
 
-    collected = case table[{x+xd, y+yd}] do
-      letter = <<char>> when char in ?A..?Z -> [letter | collected]
-      _ -> collected
-    end
-
-    {{x+xd, y+yd}, {xd, yd}, collected}
+    {{x+xd, y+yd}, {xd, yd}}
   end
 
-  def can_walk?(table, {x, y}, {xd, yd}) do
-    case table[{x+xd, y+yd}] do
-      pipe when pipe in ["|", "-", "+"] -> true
-      _letter = <<code>> when code in ?A..?Z -> true
-      _ -> false
-    end
-  end
-
-  def expected_char_for({0, _yd}), do: "|"
-  def expected_char_for({_xd, 0}), do: "-"
+  def can_walk?( <<char>>) when char in ?A..?Z, do: true
+  def can_walk?(pipe) when pipe in ["|", "-", "+"], do: true
+  def can_walk?(_), do: false
 
   def vizualization_stream(table, interval \\ 500) do
-    Stream.interval(interval)
-    |> Stream.transform({start_index(table), {0, 1}, []}, fn(_, {coords, direction, _}) ->
-      {[coords], walk(table, coords, direction)}
-    end)
-    |> Stream.map(fn({x, y}) ->
+    Stream.zip(Stream.interval(interval), coordinate_stream(table))
+    |> Stream.each(fn({_, {x, y}}) ->
+      IEx.Helpers.clear
+
       Enum.map(y-20..y+20, fn(yy) ->
         Enum.reduce(x-20..x+20, "", fn(xx, row) ->
           cond do
@@ -69,8 +62,20 @@ defmodule Aoc.Day19.Part1 do
         end)
       end)
       |> Enum.join("\n")
+      |> IO.puts
     end)
-    |> Stream.each(fn(_) -> IEx.Helpers.clear end)
-    |> Stream.each(&IO.puts/1)
   end
+
+  def filled_input(table) do
+    table_stream = coordinate_stream(table)
+                   |> Stream.scan(table, fn({x,y}, table) -> Map.put(table, {x, y}, "█") end)
+
+    table_stream
+    |> Stream.map(fn(table) ->
+      Map.keys(table) |> Enum.sort_by(fn({x,y}) -> {y,x} end) |> Enum.chunk_by(&(elem(&1, 1)))
+      |> Enum.map(fn(row) -> row |> Enum.map(&(Map.get(table, &1))) |> Enum.join("") end)
+      |> Enum.join("\n")
+    end)
+  end
+
 end

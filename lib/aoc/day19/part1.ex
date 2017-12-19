@@ -55,22 +55,20 @@ defmodule Aoc.Day19.Part1 do
   def expected_char_for({_xd, 0}), do: "-"
 
   def vizualization_stream(table, interval \\ 500) do
-    text_stream = walk_stream(table)
-    |> Stream.map(fn({{x, y}, _, _}) ->
-      Enum.map(y-10..y+10, fn(yy) ->
-        Enum.map(x-10..x+10, fn(xx) ->
+    Stream.interval(interval)
+    |> Stream.transform({start_index(table), {0, 1}, []}, fn(_, {coords, direction, _}) ->
+      {[coords], walk(table, coords, direction)}
+    end)
+    |> Stream.map(fn({x, y}) ->
+      Enum.map(y-20..y+20, fn(yy) ->
+        Enum.reduce(x-20..x+20, "", fn(xx, row) ->
           cond do
-            {x, y} == {xx, yy} -> "#"
-            true -> (table[{xx,yy}] || " ")
+            {x, y} == {xx, yy} -> row <> "#"
+            true -> row <> (table[{xx,yy}] || " ")
           end
         end)
-        |> Enum.join("")
-      end) |> Enum.join("\n")
-    end)
-
-    Stream.interval(interval)
-    |> Stream.transform(text_stream, fn(_, text_stream) ->
-      {Enum.take(text_stream, 1), Stream.drop(text_stream, 1)}
+      end)
+      |> Enum.join("\n")
     end)
     |> Stream.each(fn(_) -> IEx.Helpers.clear end)
     |> Stream.each(&IO.puts/1)

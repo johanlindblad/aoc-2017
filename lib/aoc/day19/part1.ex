@@ -61,21 +61,27 @@ defmodule Aoc.Day19.Part1 do
           end
         end)
       end)
-      |> Enum.join("\n")
       |> IO.puts
     end)
   end
 
   def filled_input(table) do
-    table_stream = coordinate_stream(table)
-                   |> Stream.scan(table, fn({x,y}, table) -> Map.put(table, {x, y}, "█") end)
-
-    table_stream
-    |> Stream.map(fn(table) ->
-      Map.keys(table) |> Enum.sort_by(fn({x,y}) -> {y,x} end) |> Enum.chunk_by(&(elem(&1, 1)))
-      |> Enum.map(fn(row) -> row |> Enum.map(&(Map.get(table, &1))) |> Enum.join("") end)
-      |> Enum.join("\n")
+    coordinate_stream(table)
+    |> Stream.scan(table_to_grid(table), fn({x,y}, grid) -> 
+      List.update_at(grid, y, fn(row) -> 
+        List.replace_at(row, x, '█')
+      end)
+    end)
+    |> Stream.zip(Stream.interval(25))
+    |> Stream.each(fn({grid, _}) -> 
+      IEx.Helpers.clear
+      IO.puts(grid)
     end)
   end
 
+  defp table_to_grid(table) do
+    Map.keys(table) |> Enum.sort_by(fn({x,y}) -> {y,x} end) |> Enum.chunk_by(&(elem(&1, 1)))
+    |> Enum.map(fn(row) -> (row |> Enum.map(&(Map.get(table, &1)))) ++ ["\n"] end)
+    |> Enum.map(&to_charlist/1)
+  end
 end

@@ -6,7 +6,7 @@ defmodule Aoc.Day15.Part1 do
     String.to_integer(number)
   end
 
-  def solve(input = [_a_first, _b_first]), do: number_streams(input) |> num_equal
+  def solve(input = [_a_first, _b_first], pairs \\ 40_000_000), do: number_streams(input) |> num_equal(pairs)
 
   def number_streams([a_first, b_first]) do
     {number_stream(a_first, 16807, 2147483647), number_stream(b_first, 48271, 2147483647)}

@@ -9,6 +9,7 @@ defmodule Aoc.Day15.Part1Test do
   end
 
   @tag :slow
+  @tag timeout: 120000
   test "example input gives 569 pairs equal" do
     start = Aoc.puzzle_input(15) |> Part1.parse
     assert Part1.solve(start) == 569

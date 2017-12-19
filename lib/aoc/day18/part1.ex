@@ -5,20 +5,21 @@ defmodule Aoc.Day18.Part1 do
   def preprocess_row(row), do: row |> String.trim |> String.split(" ")
 
   @initial_registers Enum.map(?a..?z, fn(_) -> 0 end)
-  Record.defrecord :machine, state: :running, registers: @initial_registers, send_queue: [], receive_queue: [], first_received: nil, program: [], program_past: []
+  Record.defrecord :machine, state: :running, registers: @initial_registers, send_queue: [], receive_queue: [], program: [], program_past: []
 
-  def first_received(instructions) do
-    instructions
-    |> loopback_stream
-    |> Enum.find(fn (machine(first_received: val)) -> val != nil end)
-    |> machine(:first_received)
+  def received_values(simulation_stream) do
+    simulation_stream
+    |> Stream.filter(fn(m = machine(program: [[ins, opa | _] | _],)) ->
+      ins == "rcv" && value(m, opa) > 0
+    end)
+    |> Stream.map(&(machine(&1, :receive_queue) |> List.first))
   end
 
   def loopback_stream(instructions) do
     simulation_stream(instructions, fn
       (machine = machine(send_queue: [])) -> machine
-      (machine = machine(send_queue: snd, receive_queue: rcv)) ->
-        machine(machine, send_queue: [], receive_queue: Enum.reverse(snd) ++ rcv)
+      (machine = machine(send_queue: [snd], receive_queue: rcv)) ->
+        machine(machine, send_queue: [], receive_queue: [snd | rcv])
     end)
   end
 
@@ -31,7 +32,6 @@ defmodule Aoc.Day18.Part1 do
     |> step(instruction)
   end
   def step(machine = machine(program: [])), do: machine(machine, state: :halted)
-  def simulate(machine = machine(state: :halted), _), do: machine
 
   def step(machine = machine(registers: registers), ["set", a, b]) do
     registers = List.replace_at(registers, register_index(a), value(machine, b))
@@ -66,16 +66,16 @@ defmodule Aoc.Day18.Part1 do
   end
 
   def step(machine = machine(send_queue: queue), ["snd", a]) do
-    machine(machine, send_queue: [value(machine, a) | queue])
+    machine(machine, send_queue: queue ++ [value(machine, a)])
   end
 
-  def step(machine = machine(first_received: first, registers: registers, receive_queue: queue), ["rcv", a]) do
+  def step(machine = machine(registers: registers, receive_queue: queue), ["rcv", a]) do
     case value(machine, a) do
       0 -> machine
       _ -> 
         [rcv | rest] = queue
         registers = List.replace_at(registers, register_index(a), rcv)
-        machine(machine, first_received: (first || rcv), receive_queue: rest, registers: registers)
+        machine(machine, receive_queue: rest, registers: registers)
     end
   end
 

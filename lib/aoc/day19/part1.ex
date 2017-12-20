@@ -54,7 +54,7 @@ defmodule Aoc.Day19.Part1 do
       IEx.Helpers.clear
 
       Enum.map(y-20..y+20, fn(yy) ->
-        Enum.reduce(x-20..x+20, "", fn(xx, row) ->
+        Enum.reduce(x-20..x+20, "\n", fn(xx, row) ->
           cond do
             {x, y} == {xx, yy} -> row <> "#"
             true -> row <> (table[{xx,yy}] || " ")

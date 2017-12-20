@@ -48,7 +48,7 @@ defmodule Aoc.Day19.Part1 do
   def can_walk?(pipe) when pipe in ["|", "-", "+"], do: true
   def can_walk?(_), do: false
 
-  def vizualization_stream(table, interval \\ 500) do
+  def visualization_stream(table, interval \\ 500) do
     Stream.zip(Stream.interval(interval), coordinate_stream(table))
     |> Stream.each(fn({_, {x, y}}) ->
       IEx.Helpers.clear

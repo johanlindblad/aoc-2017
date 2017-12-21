@@ -33,14 +33,14 @@ defmodule Aoc.Day21.Part1 do
       IEx.Helpers.clear
 
       padding = List.duplicate(" ", div(324 - width, 2))
+      vertical_padding = List.duplicate(" ", div(324 - width, 2))
 
-      List.duplicate(padding, div(324 - width, 2)) |> IO.puts
+      IO.puts(vertical_padding)
 
       grid
-      |> Enum.map(fn(row) -> Enum.map(row, &(Enum.at(["░", "█"], &1))) end)
+      |> Enum.map(fn(row) -> Enum.map(row, &(Enum.at([" ", "█"], &1))) end)
       |> Enum.map(fn(str) -> padding ++ str end)
       |> Enum.each(&IO.puts/1)
-
     end)
   end
 

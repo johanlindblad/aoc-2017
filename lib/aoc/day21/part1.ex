@@ -18,7 +18,6 @@ defmodule Aoc.Day21.Part1 do
     grid |> Enum.map(&Enum.sum/1) |> Enum.sum
   end
 
-
   def grid_stream({grid, width} \\ {@initial, 3}, patterns) do
     Stream.iterate({grid, width}, fn({grid, width}) ->
       new_grid = iterate({grid, width}, patterns)

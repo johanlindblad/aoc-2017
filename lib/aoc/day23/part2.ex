@@ -10,7 +10,8 @@ defmodule Aoc.Day23.Part2 do
     Stream.iterate(b, &(&1 + 17))
     |> Stream.take_while(&(&1 <= c))
     |> Stream.filter(fn(b) ->
-      Enum.any?(2..(b-1), &(rem(b, &1) == 0))
+      up_to = :math.sqrt(b) |> Float.ceil |> round
+      Enum.any?(2..(up_to), &(rem(b, &1) == 0))
     end)
     |> Enum.count
   end
